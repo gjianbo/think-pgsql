@@ -58,7 +58,21 @@ class Pgsql extends Connection
     public function getFields(string $tableName): array
     {
         list($tableName) = explode(' ', $tableName);
-        $sql             = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
+        //$sql             = 'select fields_name as "field",fields_type as "type",fields_not_null as "null",fields_key_name as "key",fields_default as "default",fields_default as "extra" from table_msg(\'' . $tableName . '\');';
+
+        $sql = "select a.attname as \"field\",
+            t.typname as \"type\",
+            a.attnotnull as \"null\",
+            i.indisprimary as \"key\",
+            d.adsrc as \"default\",
+            d.adsrc as \"extra\"
+            from pg_class c
+            inner join pg_attribute a on a.attrelid = c.oid
+            inner join pg_type t on a.atttypid = t.oid
+            left join pg_attrdef d on a.attrelid=d.adrelid and d.adnum=a.attnum
+            left join pg_index i on a.attnum=ANY(i.indkey) and c.oid = i.indrelid
+            where (c.relname='{$tableName}' or c.relname = lower('{$tableName}'))   AND a.attnum > 0
+                order by a.attnum asc;";
 
         $pdo    = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
