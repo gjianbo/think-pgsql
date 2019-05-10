@@ -111,6 +111,25 @@ class Pgsql extends Connection
     {
         return [];
     }
+    
+      /**
+     * 获取最近插入的ID
+     * @access public
+     * @param string $sequence 自增序列名
+     * @return string
+     * @throws Throwable
+     */
+    public function getLastInsID(string $sequence = null): string
+    {
+        try {
+            return $this->linkID->lastInsertId($sequence);
+        } catch (Throwable $e) {
+            if (strpos($e->getMessage(), 'SQLSTATE[55000]') !== false) {
+                return '';
+            }
+            throw  $e;
+        }
+    }
 
     protected function supportSavepoint(): bool
     {
