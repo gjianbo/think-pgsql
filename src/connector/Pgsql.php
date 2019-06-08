@@ -26,16 +26,16 @@ class Pgsql extends Connection
      * @var array
      */
     protected $params = [
-        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
+        PDO::ATTR_CASE => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
     ];
 
     /**
      * 解析pdo连接的dsn信息
      * @access protected
-     * @param  array $config 连接信息
+     * @param array $config 连接信息
      * @return string
      */
     protected function parseDsn(array $config): string
@@ -52,7 +52,7 @@ class Pgsql extends Connection
     /**
      * 取得数据表的字段信息
      * @access public
-     * @param  string $tableName
+     * @param string $tableName
      * @return array
      */
     public function getFields(string $tableName): array
@@ -74,18 +74,18 @@ class Pgsql extends Connection
             where (c.relname='{$tableName}' or c.relname = lower('{$tableName}'))   AND a.attnum > 0
                 order by a.attnum asc;";
 
-        $pdo    = $this->getPDOStatement($sql);
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         if (!empty($result)) {
             foreach ($result as $key => $val) {
                 $val = array_change_key_case($val);
 
                 $info[$val['field']] = [
-                    'name'    => $val['field'],
-                    'type'    => $val['type'],
-                    'notnull' => (bool) ('' !== $val['null']),
+                    'name' => $val['field'],
+                    'type' => $val['type'],
+                    'notnull' => (bool)('' !== $val['null']),
                     'default' => $val['default'],
                     'primary' => !empty($val['key']),
                     'autoinc' => (0 === strpos($val['extra'], 'nextval(')),
@@ -99,15 +99,15 @@ class Pgsql extends Connection
     /**
      * 取得数据库的表信息
      * @access public
-     * @param  string $dbName
+     * @param string $dbName
      * @return array
      */
     public function getTables(string $dbName = ''): array
     {
-        $sql    = "select tablename as Tables_in_test from pg_tables where  schemaname ='public'";
-        $pdo    = $this->getPDOStatement($sql);
+        $sql = "select tablename as Tables_in_test from pg_tables where  schemaname ='public'";
+        $pdo = $this->getPDOStatement($sql);
         $result = $pdo->fetchAll(PDO::FETCH_ASSOC);
-        $info   = [];
+        $info = [];
 
         foreach ($result as $key => $val) {
             $info[$key] = current($val);
@@ -139,7 +139,7 @@ class Pgsql extends Connection
     /**
      * SQL性能分析
      * @access protected
-     * @param  string $sql
+     * @param string $sql
      * @return array
      */
     protected function getExplain(string $sql): array
